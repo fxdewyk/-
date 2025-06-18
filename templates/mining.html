@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>漏洞挖掘 - 数据安全共享系统</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --light: #f8f9fa;
+      --dark: #212529;
+    }
+
+    body {
+      background-color: #f5f7ff;
+      font-family: 'Roboto', sans-serif;
+      color: #343a40;
+      padding: 20px;
+    }
+
+    .mining-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 20px 0;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 20px 20px;
+    }
+
+    .mining-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .algorithm-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s;
+      overflow: hidden;
+      height: 100%;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .algorithm-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      font-weight: 500;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .card-body {
+      padding: 25px;
+    }
+
+    .algorithm-icon {
+      font-size: 48px;
+      color: var(--primary);
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .algorithm-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .algorithm-description {
+      color: #6c757d;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .algorithm-features {
+      margin-bottom: 25px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .feature-icon {
+      color: var(--primary);
+      margin-right: 10px;
+      margin-top: 4px;
+    }
+
+    .btn-mining {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-weight: 600;
+      transition: all 0.3s;
+      display: block;
+      width: 100%;
+      text-align: center;
+    }
+
+    .btn-mining:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <div class="mining-header">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-shield-shaded me-3" style="font-size: 32px;"></i>
+          <h2 class="mb-0">漏洞挖掘分析</h2>
+        </div>
+        <div>
+          <a href="/main" class="btn btn-outline-light me-2 back-btn">
+            <i class="bi bi-arrow-left me-1"></i>返回主界面
+          </a>
+          <button class="btn btn-light" id="logout-btn">
+            <i class="bi bi-box-arrow-right me-1"></i>退出
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mining-container">
+    <div class="text-center mb-5">
+      <h3 class="text-primary">漏洞挖掘分析工具</h3>
+      <p class="lead">点击下方按钮直接进入数据分析平台</p>
+    </div>
+
+    <!-- 单一入口按钮 -->
+    <div class="d-flex justify-content-center">
+      <button class="btn-mining" id="mining-btn">
+        <i class="bi bi-shield-lock me-2"></i>进入漏洞挖掘分析平台
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // 跳转逻辑
+    document.getElementById('mining-btn').addEventListener('click', function() {
+      // 直接跳转到指定的 Streamlit 应用
+      window.open('https://homework-wyr.streamlit.app/', '_blank');
+    });
+
+    // 保留退出功能
+    document.getElementById('logout-btn').addEventListener('click', function() {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+  </script>
+</body>
+</html>

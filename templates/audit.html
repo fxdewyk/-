@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>操作日志 - 审计页面</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .audit-header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            margin-bottom: 30px;
+        }
+
+        .log-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .log-table th {
+            background: #f1f5fd;
+            font-weight: 600;
+            padding: 15px 20px;
+        }
+
+        .log-table td {
+            padding: 12px 20px;
+            vertical-align: middle;
+        }
+
+        .log-table tr {
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+
+        .log-table tr:hover {
+            background-color: #f9fbfe;
+        }
+
+        .algorithm-change {
+            background-color: #e8f4fd;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background: rgba(76, 175, 80, 0.15);
+            color: #2e7d32;
+        }
+
+        .status-failed {
+            background: rgba(244, 67, 54, 0.15);
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="audit-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">
+                    <i class="bi bi-clipboard-check text-primary me-2"></i>操作日志审计
+                </h2>
+                <div>
+                    <a href="/main" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-folder me-1"></i>文件管理
+                    </a>
+                    <button class="btn btn-outline-secondary" onclick="window.location.reload()">
+                        <i class="bi bi-arrow-repeat me-1"></i>刷新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 消息区域 -->
+        <div id="message" class="alert alert-warning mb-4" style="display: none;"></div>
+
+        <!-- 日志表格 -->
+        <div class="log-table">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>用户</th>
+                        <th>操作</th>
+                        <th>文件</th>
+                        <th>详情</th>
+                        <th>IP地址</th>
+                        <th>状态</th>
+                        <th>时间</th>
+                    </tr>
+                </thead>
+                <tbody id="log-table-body">
+                    <!-- 日志数据将由JS填充 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function loadLogs() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                document.getElementById('message').textContent = '未登录或未授权，请先登录。';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/logs', {
+                    headers: { 'Authorization': token }
+                });
+                const data = await response.json();
+
+                if (!data.success) {
+                    document.getElementById('message').textContent = data.message || '加载日志失败';
+                    return;
+                }
+
+                const tbody = document.getElementById('log-table-body');
+                tbody.innerHTML = '';
+
+                data.logs.forEach(log => {
+                    const tr = document.createElement('tr');
+
+                    // 为不同操作添加特殊样式
+                    if (log.action === "设置加密算法") {
+                        tr.className = 'algorithm-change';
+                    } else if (log.status === 'failed') {
+                        tr.className = 'failed';
+                    }
+
+                    tr.innerHTML = `
+                        <td>${log.username}</td>
+                        <td>${log.action}</td>
+                        <td>${log.filename || '-'}</td>
+                        <td>${log.details || '-'}</td>
+                        <td>${log.ip_address || '-'}</td>
+                        <td class="${log.status === 'success' ? 'success' : 'failed-text'}">${log.status}</td>
+                        <td>${log.timestamp}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                document.getElementById('message').textContent = '请求日志时发生错误，请稍后重试。';
+                console.error(error);
+            }
+        }
+
+        window.onload = loadLogs;
+        function renderLogRow(log) {
+            return `
+            <tr class="${log.action === "设置加密算法" ? 'algorithm-change' : ''}">
+                <td>${log.username}</td>
+                <td>${log.action}</td>
+                <td>${log.filename || '-'}</td>
+                <td>${log.details || '-'}</td>
+                <td>${log.ip_address || '-'}</td>
+                <td>
+                    <span class="status-badge ${log.status === 'success' ? 'status-success' : 'status-failed'}">
+                        ${log.status === 'success' ? '<i class="bi bi-check-circle me-1"></i>成功' : '<i class="bi bi-exclamation-circle me-1"></i>失败'}
+                    </span>
+                </td>
+                <td>${log.timestamp}</td>
+            </tr>
+            `;
+        }
+    </script>
+</body>
+</html>

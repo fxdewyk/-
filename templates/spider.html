@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>网页爬虫</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>网页爬虫工具</h1>
+    <div>
+        <input type="text" id="url" placeholder="输入要抓取的URL" style="width: 300px;">
+        <button onclick="crawl()">抓取</button>
+    </div>
+    <div id="result" style="margin-top: 20px; white-space: pre-wrap;"></div>
+
+    <script>
+        function crawl() {
+            const url = document.getElementById('url').value;
+            const token = localStorage.getItem('token') || '';
+
+            axios.post('/api/spider/crawl', {
+                url: url
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                document.getElementById('result').innerHTML =
+                    `抓取结果:\n\n链接:\n${response.data.data.links.join('\n')}\n\n图片:\n${response.data.data.images.join('\n')}\n\n文本示例:\n${response.data.data.text_sample}`;
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML =
+                    `错误: ${error.response?.data?.message || error.message}`;
+            });
+        }
+    </script>
+</body>
+</html>

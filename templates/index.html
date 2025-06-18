@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 数据安全共享系统</title>
+    <!-- 添加Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1976D2;
+            --secondary: #2196F3;
+            --success: #4CAF50;
+            --danger: #F44336;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            background: white;
+        }
+
+        .auth-header {
+            background: var(--primary);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .auth-body {
+            padding: 30px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #1565C0;
+            transform: translateY(-2px);
+        }
+
+        .auth-footer {
+            text-align: center;
+            padding: 20px 0 10px;
+            color: #666;
+        }
+
+        .message {
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>数据安全共享系统</h2>
+            </div>
+
+            <div class="auth-body">
+                <div id="login-form">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">用户名</label>
+                        <input type="text" class="form-control" id="username" placeholder="请输入用户名">
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">密码</label>
+                        <input type="password" class="form-control" id="password" placeholder="请输入密码">
+                    </div>
+                    <button class="btn btn-primary w-100" id="login-btn">登录</button>
+                    <div class="auth-footer">
+                        没有账号? <a href="#" id="register-link">立即注册</a>
+                    </div>
+                </div>
+
+                <div id="register-form" style="display: none;">
+                    <div class="mb-3">
+                        <label for="reg-username" class="form-label">用户名</label>
+                        <input type="text" class="form-control" id="reg-username" placeholder="请输入用户名">
+                    </div>
+                    <div class="mb-3">
+                        <label for="reg-password" class="form-label">密码</label>
+                        <input type="password" class="form-control" id="reg-password" placeholder="请输入密码">
+                    </div>
+                    <div class="mb-4">
+                        <label for="reg-confirm-password" class="form-label">确认密码</label>
+                        <input type="password" class="form-control" id="reg-confirm-password" placeholder="请再次输入密码">
+                    </div>
+                    <button class="btn btn-primary w-100" id="register-btn">注册</button>
+                    <div class="auth-footer">
+                        已有账号? <a href="#" id="login-link">返回登录</a>
+                    </div>
+                </div>
+
+                <div id="message" class="message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 切换登录和注册表单
+            document.getElementById('register-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('register-form').style.display = 'block';
+            });
+
+            document.getElementById('login-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('register-form').style.display = 'none';
+                document.getElementById('login-form').style.display = 'block';
+            });
+
+            // 登录功能
+            document.getElementById('login-btn').addEventListener('click', function() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                if (!username || !password) {
+                    showMessage('请输入用户名和密码', 'error');
+                    return;
+                }
+
+                fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 保存token
+                        localStorage.setItem('token', data.token);
+                        showMessage('登录成功，正在跳转...', 'success');
+                        // 跳转到主页
+                        setTimeout(() => {
+                            window.location.href = '/main';
+                        }, 1000);
+                    } else {
+                        showMessage(data.message || '登录失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('登录请求失败', 'error');
+                    console.error('Error:', error);
+                });
+            });
+
+            // 注册功能
+            document.getElementById('register-btn').addEventListener('click', function() {
+                const username = document.getElementById('reg-username').value;
+                const password = document.getElementById('reg-password').value;
+                const confirmPassword = document.getElementById('reg-confirm-password').value;
+
+                if (!username || !password) {
+                    showMessage('请输入用户名和密码', 'error');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    showMessage('两次输入的密码不一致', 'error');
+                    return;
+                }
+
+                fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 保存token
+                        localStorage.setItem('token', data.token);
+                        showMessage('注册成功，正在跳转...', 'success');
+                        // 跳转到主页
+                        setTimeout(() => {
+                            window.location.href = '/main';
+                        }, 1000);
+                    } else {
+                        showMessage(data.message || '注册失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('注册请求失败', 'error');
+                    console.error('Error:', error);
+                });
+            });
+
+            // 显示消息
+            function showMessage(text, type) {
+                const messageElement = document.getElementById('message');
+                messageElement.textContent = text;
+                messageElement.className = 'message ' + type;
+                messageElement.style.display = 'block';
+
+                // 3秒后自动隐藏
+                setTimeout(() => {
+                    messageElement.style.display = 'none';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
